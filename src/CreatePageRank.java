@@ -13,9 +13,10 @@ import java.util.zip.GZIPInputStream;
 public class CreatePageRank {
     //freebase.gz
     //freebase-head.gz
+    //freebase.pokus.gz
     static String inputFile="freebase.pokus.gz"; //file from which program takes triplets
     static int maxLines=10000; //max number of lines I go through from input file (-1)
-    static int numberOfIterations = 100; //how many times will program iterate through provided file to enumerate pagerank
+    static int numberOfIterations = 10; //how many times will program iterate through provided file to enumerate pagerank
 
     public static void cleanDirectory(){
         File dir = new File(".\\files\\output\\objects");
@@ -134,7 +135,7 @@ public class CreatePageRank {
             }
             //zapisem do suboru
         }
-        output.write(name+"\t"+value+",0,0\n");//nazov, pocet odkazov, pagerank, pom ci som uz upravoval pagerank
+        output.write(name+"\t"+value+",1,0\n");//nazov, pocet odkazov, pagerank, pom ci som uz upravoval pagerank
         output.close();
         br.close();
     }
@@ -163,6 +164,7 @@ public class CreatePageRank {
 
     public static void countPageRank(String fileName) throws Exception{
         for(int i=0; i<numberOfIterations; i++){
+            System.out.println("iteration: "+i);
             GZIPInputStream file = new GZIPInputStream(new FileInputStream(".\\files\\input\\"+fileName));
             BufferedReader br = new BufferedReader(new InputStreamReader(file));
             int counter =0; //this will count number of lines. We dont have to look on lines, we never analysed in first place
@@ -325,6 +327,8 @@ public class CreatePageRank {
     }
 
     public static double countPageRank(double rankA, int links, double rankB, int updated){
+        if(rankA==0)
+            System.out.println("lopata");
         if (links == 0)
             links = 1;
         if (updated==1)
@@ -332,28 +336,86 @@ public class CreatePageRank {
         return (rankA/links);
     }
 
+    public static void findMaxNodes(int numberOfHits) throws Exception {
+        File dir = new File(".\\files\\output\\objects");
+        BufferedReader br;
+        String name, pom;
+        Double value;
+        ArrayList <String> names = new ArrayList<String>();
+        ArrayList <Double> values = new ArrayList<Double>();
+
+        for(File file: dir.listFiles()){
+
+            br = new BufferedReader(new FileReader(file));
+            String line = br.readLine();
+            br.close();
+            System.out.println(line);
+            name = line.substring(0,line.indexOf('\t'));
+            pom = line.substring(line.indexOf(',')+1);
+            value = Double.parseDouble(pom.substring(0,pom.indexOf(',')));
+            if(names.size()<numberOfHits){
+                names.add(name);
+                values.add(value);
+            }else{
+                //i ll drom element with lowest rank
+                int index = getIndexOfMin(values);
+                values.remove(index);
+                names.remove(index);
+                names.add(name);
+                values.add(value);
+            }
+        }
+        for (int i =0; i<names.size(); i++){
+            System.out.println(names.get(i)+": "+values.get(i));
+        }
+
+    }
+
+    public static int getIndexOfMin(ArrayList<Double> values){
+        Double min=0.0;
+        int MinId = 0;
+        for (int i=0; i<values.size(); i++){
+            if (i==0){
+                min=values.get(i);
+                MinId=i;
+                continue;
+            }
+            if (values.get(i)<min) {
+                min = values.get(i);
+                MinId=i;
+                continue;
+            }
+        }
+        return MinId;
+    }
+
     public static void main(String[] args) {
         try {
             //delete all object files from previous run of program
             cleanDirectory();
-
+            System.out.println("Cleaned");
             //create new file with objects and number of connections
             processInputFile(inputFile);
-
+            System.out.println("Processed");
             //sort File created by previous method
             sortFile();
-
+            System.out.println("Sorted");
             //merge duplicate lines in sorted file
             mergeFile();
-
+            System.out.println("Merged");
             //create new file for each line of merged file with its own name
             divideFileIntoFiles();
-
+            System.out.println("Divided");
             //mam vytvorene subory
             countPageRank(inputFile);
-
+            System.out.println("Counted");
             //find maximum
-
+            if (0==0.0)
+                System.out.println("ano");
+            else{
+                System.out.println("nie");
+            }
+            findMaxNodes(10);
             //hladanie max hodnoty
             /*int maxvalue=0;
             List list = new ArrayList();
