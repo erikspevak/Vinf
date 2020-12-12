@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -349,7 +350,7 @@ public class CreatePageRank {
             br = new BufferedReader(new FileReader(file));
             String line = br.readLine();
             br.close();
-            System.out.println(line);
+            //System.out.println(line);
             name = line.substring(0,line.indexOf('\t'));
             pom = line.substring(line.indexOf(',')+1);
             value = Double.parseDouble(pom.substring(0,pom.indexOf(',')));
@@ -363,6 +364,15 @@ public class CreatePageRank {
                 names.remove(index);
                 names.add(name);
                 values.add(value);
+            }
+        }
+        //lets sort it a bit with BUBBLESORT
+        for (int i=0; i<values.size(); i++){
+            for (int j=0; j<values.size()-1; j++){
+                if(values.get(j+1)>values.get(j)){
+                    Collections.swap(values, j, j+1);
+                    Collections.swap(names, j, j+1);
+                }
             }
         }
         for (int i =0; i<names.size(); i++){
@@ -410,11 +420,6 @@ public class CreatePageRank {
             countPageRank(inputFile);
             System.out.println("Counted");
             //find maximum
-            if (0==0.0)
-                System.out.println("ano");
-            else{
-                System.out.println("nie");
-            }
             findMaxNodes(10);
             //hladanie max hodnoty
             /*int maxvalue=0;
